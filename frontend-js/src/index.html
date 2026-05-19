@@ -1,34 +1,10 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Polyglot Cloud Migration App</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 40px; background-color: #f4f4f9; text-align: center; }
-        .container { padding: 20px; background: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: inline-block; }
-        .badge { background-color: #007acc; color: white; padding: 10px 20px; border-radius: 5px; display: inline-block; margin-top: 10px; }
-    </style>
+    <title>Polyglot App</title>
 </head>
-<body>
-    <div class="container">
-        <h1>Polyglot DevOps Application</h1>
-        <p>Deployment Version: <strong id="version">v1.0.0</strong></p>
-        <div class="badge">Status: Live on Cloud</div>
-        <div style="margin-top:20px;">
-            <button onclick="checkBackend()">Check Backend Status</button>
-            <p id="backend-status">Click button to test endpoint...</p>
-        </div>
-    </div>
-    <script>
-        async function checkBackend() {
-            try {
-                const res = await fetch('/api/status');
-                const data = await res.json();
-                document.getElementById('backend-status').innerText = `Response: ${data.status} via ${data.framework}`;
-            } catch (err) {
-                document.getElementById('backend-status').innerText = 'Error connecting to API backend.';
-            }
-        }
-    </script>
+<body style="background: #121212; color: white; font-family: sans-serif; text-align: center; padding-top: 50px;">
+    <h1>Air University Cloud Migration App</h1>
+    <div id="status">Connecting to Backend Tier...</div>
 </body>
 </html>
