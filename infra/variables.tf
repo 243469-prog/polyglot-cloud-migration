@@ -1,11 +1,11 @@
-variable "location" {
+variable "aws_region" {
   type        = string
-  default     = "West Europe"
-  description = "Azure region to deploy resources"
+  default     = "us-east-1"
+  description = "Target cloud deployment region"
 }
 
-variable "vm_size" {
+variable "instance_name" {
   type        = string
-  default     = "Standard_B1ms"
-  description = "Free Tier eligible VM size (1 vCPU, 1GB RAM)"
+  default     = "polyglot-app-server"
+  description = "Name tag for our virtual machine"
 }

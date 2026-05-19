@@ -1,4 +1,4 @@
-﻿output "public_ip" {
-  value       = azurerm_linux_virtual_machine.web_server.public_ip_address
-  description = "Public IP profile of the Cloud Azure VM"
+﻿output "server_public_ip" {
+  value       = aws_instance.app_server.public_ip
+  description = "The public IP address of our deployed application host cloud server"
 }
