@@ -1,33 +1,44 @@
 version: '3.8'
 
-services:
-  redis:
-    image: redis:alpine
-    ports:
-      - "6379:6379"
+networks:
+  polyglot-net:
+    driver: bridge
 
+services:
+  # Tier 1: .NET Web API Backend
   backend:
-    image: polyglot-backend:latest
-    build: ./backend-dotnet
+    build:
+      context: ./backend-dotnet
+      dockerfile: Dockerfile
+    container_name: dotnet-backend-api
     ports:
       - "5000:5000"
-    depends_on:
-      - redis
-    environment:
-      - REDIS_HOST=redis
+    networks:
+      - polyglot-net
+    restart: always
 
+  # Tier 2: Python Background Worker
   worker:
-    image: polyglot-worker:latest
-    build: ./worker-python
+    build:
+      context: ./worker-python
+      dockerfile: Dockerfile
+    container_name: python-task-worker
     depends_on:
-      - redis
-    environment:
-      - REDIS_HOST=redis
+      - backend
+    networks:
+      - polyglot-net
+    restart: always
 
+  # Tier 3: JavaScript/Nginx Frontend
   frontend:
-    image: polyglot-frontend:latest
-    build: ./frontend-js
+    build:
+      context: ./frontend-js
+      dockerfile: Dockerfile
+    container_name: js-nginx-frontend
     ports:
       - "8080:80"
     depends_on:
       - backend
+    networks:
+      - polyglot-net
+    restart: always
