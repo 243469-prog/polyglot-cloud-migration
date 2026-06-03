@@ -1,4 +1,4 @@
-name: Polyglot CI Pipeline
+name: Polyglot CI/CD Pipeline
 
 on:
   push:
@@ -7,13 +7,13 @@ on:
     branches: [ main ]
 
 jobs:
-  build-and-test:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    # 1. Setup Runtimes for Your 3-Tier Application
+    # 1. Setup Environment Runtimes
     - name: Setup .NET Core Backend
       uses: actions/setup-dotnet@v4
       with:
@@ -29,16 +29,46 @@ jobs:
       with:
         node-version: '20'
 
-    # 2. Automated Quality and Linting Checks (Rubric Compliance)
-    - name: Run Backend Tests
-      run: echo "Running .NET Core API unit tests..."
-
-    - name: Run Frontend Linting
-      run: echo "Running JavaScript quality syntax checks..."
-
-    # 3. Build Docker Container Images
-    - name: Build App Docker Images
+    # 2. Compile and Restore using your exact file paths
+    # (Matches backend-dotnet/src/ from your VS Code sidebar)
+    - name: Compile Backend Web API
       run: |
-        echo "Building image for backend-dotnet..."
-        echo "Building image for worker-python..."
-        echo "Building image for frontend-js..."
+        dotnet restore ./backend-dotnet/src/backend-dotnet.csproj
+        dotnet build ./backend-dotnet/src/backend-dotnet.csproj --configuration Release
+
+    # 3. Initialize Multi-Container Builder Cache
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    # 4. Authenticate with Docker Hub (Only fires when code drops directly onto main)
+    - name: Authenticate Container Registry
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
+
+    # 5. Package & Build Containers using your file roots
+    - name: Package & Ship Backend Container
+      uses: docker/build-push-action@v5
+      with:
+        context: ./backend-dotnet
+        file: ./backend-dotnet/Dockerfile
+        push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        tags: ${{ secrets.REGISTRY_USERNAME }}/polyglot-backend:latest
+
+    - name: Package & Ship Worker Container
+      uses: docker/build-push-action@v5
+      with:
+        context: ./worker-python
+        file: ./worker-python/Dockerfile
+        push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        tags: ${{ secrets.REGISTRY_USERNAME }}/polyglot-worker:latest
+
+    - name: Package & Ship Frontend Container
+      uses: docker/build-push-action@v5
+      with:
+        context: ./frontend-js
+        file: ./frontend-js/Dockerfile
+        push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        tags: ${{ secrets.REGISTRY_USERNAME }}/polyglot-frontend:latest

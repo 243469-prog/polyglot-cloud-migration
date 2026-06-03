@@ -1,6 +1,21 @@
 ﻿var builder = WebApplication.CreateBuilder(args);
+
+// Add CORS support to allow your frontend container to make requests
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
 var app = builder.Build();
 
-app.MapGet("/api/health", () => Task.FromResult(new { status = "Healthy", message = "Connected to .NET Core API" }));
+// Activate CORS policy right before handling routes
+app.UseCors("AllowAll");
 
-app.Run("http://0.0.0.0:5000");
+app.MapGet("/api/health", () => Task.FromResult(new { status = "Healthy", message = "Connected to .NET API!" }));
+
+app.Run("http://*:5000");
