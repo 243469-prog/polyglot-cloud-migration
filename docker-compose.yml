@@ -5,18 +5,17 @@ networks:
     driver: bridge
 
 services:
-  # Tier 1: .NET Web API Backend
+# Tier 1: .NET Web API Backend
   backend:
     build:
       context: ./backend-dotnet
       dockerfile: Dockerfile
     container_name: dotnet-backend-api
     ports:
-      - "5000:5000"
+      - "5050:5000"
     networks:
       - polyglot-net
     restart: always
-
   # Tier 2: Python Background Worker
   worker:
     build:
@@ -29,14 +28,14 @@ services:
       - polyglot-net
     restart: always
 
-  # Tier 3: JavaScript/Nginx Frontend
+# Tier 3: JavaScript/Nginx Frontend
   frontend:
     build:
       context: ./frontend-js
       dockerfile: Dockerfile
     container_name: js-nginx-frontend
     ports:
-      - "8080:80"
+      - "9090:80"
     depends_on:
       - backend
     networks:

@@ -1,10 +1,38 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Polyglot App</title>
 </head>
 <body style="background: #121212; color: white; font-family: sans-serif; text-align: center; padding-top: 50px;">
     <h1>Air University Cloud Migration App</h1>
-    <div id="status">Connecting to Backend Tier...</div>
+    <div id="status" style="font-size: 1.5rem; margin-top: 20px; padding: 10px; display: inline-block;">Connecting to Backend Tier...</div>     
+
+    <script>
+        // MUST point to port 5050 to hit the backend container map smoothly
+        const BACKEND_URL = 'http://localhost:5050/api/health';
+
+        async function checkBackend() {
+            const statusDiv = document.getElementById('status');
+            try {
+                const response = await fetch(BACKEND_URL);
+                if (response.ok) {
+                    const data = await response.json();
+                    statusDiv.innerText = "🟢 Connected to Backend Tier! Message: " + data.message;
+                    statusDiv.style.color = "#4BB543";
+                } else {
+                    statusDiv.innerText = "🔴 Backend responded with an error.";
+                    statusDiv.style.color = "#FF3333";
+                }
+            } catch (error) {
+                statusDiv.innerText = "🔴 Error connecting to API backend. (Is the backend running?)";
+                statusDiv.style.color = "#FF3333";
+                console.error(error);
+            }
+        }
+
+        // Run the connection check as soon as the page loads
+        window.onload = checkBackend;
+    </script>
 </body>
 </html>
